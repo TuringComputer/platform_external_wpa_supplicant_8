@@ -26,16 +26,12 @@ L_CFLAGS += -DANDROID_LOG_NAME=\"hostapd\"
 
 # Disable unused parameter warnings
 L_CFLAGS += -Wno-unused-parameter
-ifeq ($(BOARD_WLAN_DEVICE), bcmdhd)
-L_CFLAGS += -DANDROID_P2P
-endif
-
-ifeq ($(BOARD_WLAN_DEVICE),$(filter $(BOARD_WLAN_DEVICE), qcwcn UNITE))
-L_CFLAGS += -DANDROID_P2P
-endif
 
 # Set Android extended P2P functionality
 L_CFLAGS += -DANDROID_P2P
+ifeq ($(BOARD_HOSTAPD_PRIVATE_LIB),)
+L_CFLAGS += -DANDROID_P2P_STUB
+endif
 
 # Use Android specific directory for control interface sockets
 L_CFLAGS += -DCONFIG_CTRL_IFACE_CLIENT_DIR=\"/data/misc/wifi/sockets\"
@@ -904,18 +900,26 @@ LOCAL_CFLAGS := $(L_CFLAGS)
 LOCAL_SRC_FILES := $(OBJS_c)
 LOCAL_C_INCLUDES := $(INCLUDES)
 include $(BUILD_EXECUTABLE)
+########################
+
+local_target_dir := $(TARGET_OUT)/etc/wifi
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := hostapd.conf
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(local_target_dir)
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
+include $(BUILD_PREBUILT)
 
 ########################
-ifneq ($(BOARD_SUPPORT_BCM_WIFI),)
-
 include $(CLEAR_VARS)
 LOCAL_MODULE := hostapd
 LOCAL_MODULE_TAGS := optional
 ifdef CONFIG_DRIVER_CUSTOM
 LOCAL_STATIC_LIBRARIES := libCustomWifi
 endif
-ifneq ($(BOARD_HOSTAPD_PRIVATE_LIB_BCM),)
-LOCAL_STATIC_LIBRARIES += $(BOARD_HOSTAPD_PRIVATE_LIB_BCM)
+ifneq ($(BOARD_HOSTAPD_PRIVATE_LIB),)
+LOCAL_STATIC_LIBRARIES += $(BOARD_HOSTAPD_PRIVATE_LIB)
 endif
 LOCAL_SHARED_LIBRARIES := libc libcutils liblog libcrypto libssl
 ifdef CONFIG_DRIVER_NL80211
@@ -926,34 +930,6 @@ LOCAL_STATIC_LIBRARIES += libnl_2
 endif
 endif
 LOCAL_CFLAGS := $(L_CFLAGS)
-LOCAL_SRC_FILES := $(OBJS)
-LOCAL_C_INCLUDES := $(INCLUDES)
-include $(BUILD_EXECUTABLE)
-
-endif
-
-########################
-
-########################
-include $(CLEAR_VARS)
-LOCAL_MODULE := rtl_hostapd
-LOCAL_MODULE_TAGS := optional
-ifdef CONFIG_DRIVER_CUSTOM
-LOCAL_STATIC_LIBRARIES := libCustomWifi
-endif
-ifneq ($(BOARD_HOSTAPD_PRIVATE_LIB_RTL),)
-LOCAL_STATIC_LIBRARIES += $(BOARD_HOSTAPD_PRIVATE_LIB_RTL)
-endif
-LOCAL_SHARED_LIBRARIES := libc libcutils liblog libcrypto libssl
-ifdef CONFIG_DRIVER_NL80211
-ifneq ($(wildcard external/libnl),)
-LOCAL_SHARED_LIBRARIES += libnl
-else
-LOCAL_STATIC_LIBRARIES += libnl_2
-endif
-endif
-LOCAL_CFLAGS := $(L_CFLAGS)
-LOCAL_CFLAGS += -DFSL_WIFI_VENDOR
 LOCAL_SRC_FILES := $(OBJS)
 LOCAL_C_INCLUDES := $(INCLUDES)
 include $(BUILD_EXECUTABLE)

@@ -93,10 +93,6 @@ static void p2p_expire_peers(struct p2p_data *p2p)
 			continue;
 		}
 
-#ifdef FSL_WIFI_VENDOR
-               if (dev->req_config_methods != 0)
-                       continue;
-#endif
 		p2p_dbg(p2p, "Expiring old peer entry " MACSTR,
 			MAC2STR(dev->info.p2p_device_addr));
 		dl_list_del(&dev->list);
@@ -740,6 +736,7 @@ int p2p_add_device(struct p2p_data *p2p, const u8 *addr, int freq,
 	if (os_memcmp(addr, p2p_dev_addr, ETH_ALEN) != 0)
 		os_memcpy(dev->interface_addr, addr, ETH_ALEN);
 	if (msg.ssid &&
+	    msg.ssid[1] <= sizeof(dev->oper_ssid) &&
 	    (msg.ssid[1] != P2P_WILDCARD_SSID_LEN ||
 	     os_memcmp(msg.ssid + 2, P2P_WILDCARD_SSID, P2P_WILDCARD_SSID_LEN)
 	     != 0)) {

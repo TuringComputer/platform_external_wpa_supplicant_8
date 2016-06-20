@@ -1,7 +1,6 @@
 /*
  * Wi-Fi Direct - P2P Device Discoverability procedure
  * Copyright (c) 2010, Atheros Communications
- * Copyright (C) 2015 Freescale Semiconductor, Inc.
  *
  * This software may be distributed under the terms of the BSD license.
  * See README for more details.
@@ -21,18 +20,12 @@ static struct wpabuf * p2p_build_dev_disc_req(struct p2p_data *p2p,
 {
 	struct wpabuf *buf;
 	u8 *len;
-#ifdef FSL_WIFI_VENDOR
-    static u8 diatkn_inc = 0;
-#endif
+
 	buf = wpabuf_alloc(100);
 	if (buf == NULL)
 		return NULL;
-#ifdef FSL_WIFI_VENDOR
-    if  (!(diatkn_inc++ % 2))
-        go->dialog_token++;
-#else
+
 	go->dialog_token++;
-#endif
 	if (go->dialog_token == 0)
 		go->dialog_token = 1;
 	p2p_buf_add_public_action_hdr(buf, P2P_DEV_DISC_REQ, go->dialog_token);

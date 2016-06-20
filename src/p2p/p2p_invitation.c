@@ -1,7 +1,6 @@
 /*
  * Wi-Fi Direct - P2P Invitation procedure
  * Copyright (c) 2010, Atheros Communications
- * Copyright (C) 2015 Freescale Semiconductor, Inc.
  *
  * This software may be distributed under the terms of the BSD license.
  * See README for more details.
@@ -207,11 +206,7 @@ void p2p_process_invitation_req(struct p2p_data *p2p, const u8 *sa,
 			goto fail;
 		}
 	}
-#ifdef FSL_WIFI_VENDOR
-      else {
-               p2p_add_dev_info(p2p, sa, dev, &msg);
-       }
-#endif
+
 	if (!msg.group_id || !msg.channel_list) {
 		p2p_dbg(p2p, "Mandatory attribute missing in Invitation Request from "
 			MACSTR, MAC2STR(sa));

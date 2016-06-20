@@ -5,7 +5,6 @@
  * Copyright (c) 2005-2006, Devicescape Software, Inc.
  * Copyright (c) 2007, Johannes Berg <johannes@sipsolutions.net>
  * Copyright (c) 2009-2010, Atheros Communications
- * Copyright (C) 2015 Freescale Semiconductor, Inc.
  *
  * This software may be distributed under the terms of the BSD license.
  * See README for more details.
@@ -1687,14 +1686,7 @@ static void mlme_event_disconnect(struct wpa_driver_nl80211_data *drv,
 			wpa_printf(MSG_DEBUG, "nl80211: Ignore disconnect "
 				   "event triggered during reassociation");
 			return;
-#ifdef BROADCOM_WIFI_VENDOR
-		} else if ((WLAN_REASON_DEAUTH_LEAVING == nla_get_u16(reason)) &&
-                !(drv->associated)) {
-            wpa_printf(MSG_WARNING, "nl80211: Ignore disconnect "
-                            "supplicant has already updated its state machine");
-            return;
-#endif
-        }
+		}
 		wpa_printf(MSG_WARNING, "nl80211: Was expecting local "
 			   "disconnect but got another disconnect "
 			   "event first");
@@ -3901,17 +3893,11 @@ static int wiphy_info_handler(struct nl_msg *msg, void *arg)
 	wiphy_info_supp_cmds(info, tb[NL80211_ATTR_SUPPORTED_COMMANDS]);
 	wiphy_info_cipher_suites(info, tb[NL80211_ATTR_CIPHER_SUITES]);
 
-#if !defined(FSL_WIFI_VENDOR) || defined(BROADCOM_WIFI_VENDOR)
-    if (tb[NL80211_ATTR_OFFCHANNEL_TX_OK]) {
-        wpa_printf(MSG_DEBUG, "nl80211: Using driver-based "
-                "off-channel TX");
-        capa->flags |= WPA_DRIVER_FLAGS_OFFCHANNEL_TX;
-    }
-#endif
-#ifdef FSL_WIFI_VENDOR
-    wpa_printf(MSG_INFO, "nl80211: no Using driver-based "
-            "off-channel TX");
-#endif
+	if (tb[NL80211_ATTR_OFFCHANNEL_TX_OK]) {
+		wpa_printf(MSG_DEBUG, "nl80211: Using driver-based "
+			   "off-channel TX");
+		capa->flags |= WPA_DRIVER_FLAGS_OFFCHANNEL_TX;
+	}
 
 	if (tb[NL80211_ATTR_ROAM_SUPPORT]) {
 		wpa_printf(MSG_DEBUG, "nl80211: Using driver-based roaming");
@@ -3926,9 +3912,8 @@ static int wiphy_info_handler(struct nl_msg *msg, void *arg)
 
 	wiphy_info_tdls(capa, tb[NL80211_ATTR_TDLS_SUPPORT],
 			tb[NL80211_ATTR_TDLS_EXTERNAL_SETUP]);
-#if !defined(FSL_WIFI_VENDOR) || defined(BROADCOM_WIFI_VENDOR)
+
 	if (tb[NL80211_ATTR_DEVICE_AP_SME])
-#endif
 		info->device_ap_sme = 1;
 
 	wiphy_info_feature_flags(info, tb[NL80211_ATTR_FEATURE_FLAGS]);

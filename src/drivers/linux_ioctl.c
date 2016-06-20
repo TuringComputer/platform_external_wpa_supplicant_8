@@ -47,7 +47,7 @@ int linux_set_iface_flags(int sock, const char *ifname, int dev_up)
 		ret = errno ? -errno : -999;
 		wpa_printf(MSG_ERROR, "Could not set interface %s flags (%s): "
 			   "%s",
-			   ifname, dev_up ? "UP" : "DOWN", strerror(errno));
+			   ifname, dev_up ? "UP" : "DOWN", strerror(ret));
 		return ret;
 	}
 

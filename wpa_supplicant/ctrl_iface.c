@@ -4823,12 +4823,6 @@ static int p2p_ctrl_set(struct wpa_supplicant *wpa_s, char *cmd)
 		return p2p_set_listen_channel(wpa_s->global->p2p, 81,
 					      atoi(param), 1);
 	}
-#ifdef FSL_WIFI_VENDOR
-    if (os_strcmp(cmd, "go_intent") == 0) {
-        wpa_s->conf->p2p_go_intent = atoi(param);
-        return 0;
-    }
-#endif
 
 	if (os_strcmp(cmd, "ssid_postfix") == 0) {
 		return p2p_set_ssid_postfix(wpa_s->global->p2p, (u8 *) param,
@@ -5821,14 +5815,6 @@ static int wpas_ctrl_radio_work_show(struct wpa_supplicant *wpa_s,
 	struct wpa_radio_work *work;
 	char *pos, *end;
 	struct os_reltime now, diff;
-	char *reply;
-	const int reply_size = 4096;
-	int ctrl_rsp = 0;
-	int reply_len;
-#ifdef FSL_WIFI_VENDOR
-    if(os_strncmp(buf, "PING", 4) != 0)
-        wpa_printf(MSG_INFO, "[CTRL_IFACE]%s: %s", wpa_s->ifname, buf);
-#endif
 
 	pos = buf;
 	end = buf + buflen;
@@ -7015,8 +7001,6 @@ char * wpa_supplicant_ctrl_iface_process(struct wpa_supplicant *wpa_s,
 #endif /* CONFIG_AUTOSCAN */
 #ifdef ANDROID
 	} else if (os_strncmp(buf, "DRIVER ", 7) == 0) {
-        if (os_strncasecmp(buf + 7, "P2P_DISABLE", 11) == 0)
-            wpas_p2p_stop_find(wpa_s);
 		reply_len = wpa_supplicant_driver_cmd(wpa_s, buf + 7, reply,
 						      reply_size);
 #endif /* ANDROID */
@@ -7502,11 +7486,6 @@ char * wpa_supplicant_global_ctrl_iface_process(struct wpa_global *global,
 	reply = wpas_global_ctrl_iface_redir(global, buf, resp_len);
 	if (reply)
 		return reply;
-
-#ifdef FSL_WIFI_VENDOR
-       if(os_strncmp(buf, "PING", 4) != 0)
-               wpa_printf(MSG_INFO, "[CTRL_IFACE_G]%s", buf);
-#endif
 
 	if (os_strcmp(buf, "PING") == 0)
 		level = MSG_EXCESSIVE;
